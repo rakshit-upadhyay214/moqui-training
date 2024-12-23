@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="demo">
+    <org.moqui.training.MoquiTraining trainingId="1" trainingName="Creating Entity" trainingDate="2024-12-23" trainingPrice="500" trainingDuration="12"/>
+    <org.moqui.training.MoquiTraining trainingId="2" trainingName="Database Connectivity" trainingDate="2024-12-24" trainingPrice="500" trainingDuration="10"/>
+</entity-facade-xml>
