@@ -1,0 +1,21 @@
+[
+  {
+    "_dataType": "demo"
+  },
+  {
+    "_entity": "MoquiTraining",
+    "trainingId": "3",
+    "trainingName": "Define Entity Relationships",
+    "trainingDate": "2024-12-25",
+    "trainingPrice": "500",
+    "trainingDuration": "13"
+  },
+  {
+    "_entity": "MoquiTraining",
+    "trainingId": "4",
+    "trainingName": "Developing REST API",
+    "trainingDate": "2024-12-26",
+    "trainingPrice": "6550.555",
+    "trainingDuration": "10"
+  }
+]
