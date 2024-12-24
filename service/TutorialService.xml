@@ -4,25 +4,51 @@
 
 <!--    Create a new service to fetch records from the MoquiTraining entity.-->
     <service verb="find" noun="MoquiTraining">
-
 <!--        Allow filtering by trainingName or trainingId.-->
         <in-parameters>
             <parameter name="trainingId" required="true"/>
         </in-parameters>
-
 <!--        Return a list of records containing only trainingId, trainingName, and trainingDate.-->
         <out-parameters>
             <parameter name="trainingList"/>
         </out-parameters>
-
         <actions>
             <entity-find entity-name="org.moqui.training.MoquiTraining" list="trainingList">
                 <econdition field-name="trainingId" value="${trainingId}"/>
                 <select-field field-name="trainingId, trainingName, trainingDate"/>
             </entity-find>
         </actions>
-
     </service>
 
+    <service verb="store" noun="MoquiTraining">
+        <in-parameters>
+            <parameter name="trainingId" required="true"/>
+            <parameter name="trainingName" required="true"/>
+            <parameter name="trainingDate" required="true"/>
+            <parameter name="trainingPrice" required="true"/>
+            <parameter name="trainingDuration" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="trainingId" required="true"/>
+            <parameter name="trainingName" required="true"/>
+            <parameter name="trainingDate" />
+            <parameter name="trainingPrice" />
+            <parameter name="trainingDuration"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="org.moqui.training.MoquiTraining" value-field="existingRecord"/>
+            <if condition="existingRecord">
+                <then>
+                    <set field="existingRecord.trainingDate" from="trainingDate"/>
+                    <set field="existingRecord.trainingName" from="trainingName"/>
+                    <set field="existingRecord.trainingPrice" from="trainingPrice"/>
+                    <set field="existingRecord.trainingDuration" from="trainingDuration"/>
+                    <entity-update value-field="existingRecord"/>
+                </then>
+            </if>
+            <else>
+                <service-call name="org.moqui.training.MoquiTraining.create#MoquiTraining" in-map="context" out-map="context"/>
+            </else>
+        </actions>
+    </service>
 </services>
-
