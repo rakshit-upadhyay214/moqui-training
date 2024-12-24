@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="MoquiTraining" type="entity-auto">
+        <in-parameters>
+            <auto-parameters entity-name="org.moqui.training.MoquiTraining"/>
+            <parameter name="trainingId" required="true"/>
+            <parameter name="trainingName"/>
+            <parameter name="trainingDate"/>
+            <parameter name="trainingPrice"/>
+            <parameter name="trainingDuration"/>
+        </in-parameters>
+        <out-parameters>
+            <auto-parameters include="pk" required="true"/>
+        </out-parameters>
+<!--        <actions>-->
+<!--            <log message="==========context before=${context}"/>-->
+<!--            <service-call name="create#org.moqui.training.MoquiTraining" in-map="context"/>-->
+<!--        </actions>-->
+    </service>
+</services>
