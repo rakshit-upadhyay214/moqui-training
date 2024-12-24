@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+<!--    Create a new service to fetch records from the MoquiTraining entity.-->
+    <service verb="find" noun="MoquiTraining">
+
+<!--        Allow filtering by trainingName or trainingId.-->
+        <in-parameters>
+            <parameter name="trainingId" required="true"/>
+        </in-parameters>
+
+<!--        Return a list of records containing only trainingId, trainingName, and trainingDate.-->
+        <out-parameters>
+            <parameter name="trainingList"/>
+        </out-parameters>
+
+        <actions>
+            <entity-find entity-name="org.moqui.training.MoquiTraining" list="trainingList">
+                <econdition field-name="trainingId" value="${trainingId}"/>
+                <select-field field-name="trainingId, trainingName, trainingDate"/>
+            </entity-find>
+        </actions>
+
+    </service>
+
+</services>
+
