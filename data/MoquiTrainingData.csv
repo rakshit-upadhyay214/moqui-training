@@ -1,0 +1,4 @@
+org.moqui.training.MoquiTraining,demo
+trainingId,trainingName,trainingDate,trainingPrice,trainingDuration
+13,"Social Relationships","2024-01-05",500,10
+14,"Develop OMS","2024-12-30",6550.555,10

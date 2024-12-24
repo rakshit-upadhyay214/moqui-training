@@ -2,7 +2,7 @@
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
-    <service verb="create" noun="MoquiTraining" type="entity-auto">
+    <service verb="create" noun="MoquiTraining" type="script" location="component://moqui-training/service/MoquiTrainingService.groovy">
         <in-parameters>
             <auto-parameters entity-name="org.moqui.training.MoquiTraining"/>
             <parameter name="trainingId" required="true"/>
@@ -15,8 +15,16 @@
             <auto-parameters include="pk" required="true"/>
         </out-parameters>
 <!--        <actions>-->
-<!--            <log message="==========context before=${context}"/>-->
-<!--            <service-call name="create#org.moqui.training.MoquiTraining" in-map="context"/>-->
+<!--&lt;!&ndash;            <log message="==========context before=${context}"/>&ndash;&gt;-->
+<!--&lt;!&ndash;            <service-call name="create#org.moqui.training.MoquiTraining" in-map="context"/>&ndash;&gt;-->
+<!--            <script>-->
+<!--                if (true) {-->
+<!--                ec.service.sync().name("create#org.moqui.training.MoquiTraining")-->
+<!--                .parameters(context).call()-->
+<!--                if (ec.message.hasError()) return-->
+<!--                }-->
+<!--                return;-->
+<!--            </script>-->
 <!--        </actions>-->
     </service>
 </services>
