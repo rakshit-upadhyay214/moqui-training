@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="create" noun="MoquiTraining">
+        <in-parameters>
+            <auto-parameters entity-name="org.moqui.training.MoquiTraining"/>
+            <parameter name="trainingId" required="true"/>
+            <parameter name="trainingName"/>
+            <parameter name="trainingDate" type="Date"/>
+            <parameter name="trainingPrice"/>
+            <parameter name="trainingDuration"/>
+        </in-parameters>
+        <out-parameters>
+            <auto-parameters include="pk" required="true"/>
+        </out-parameters>
+        <actions>
+            <script>
+                if (true) {
+                ec.service.sync().name("create#org.moqui.training.MoquiTraining")
+                .parameters(context).call()
+                if (ec.message.hasError()) return
+                }
+                return;
+            </script>
+        </actions>
+    </service>
+</services>
