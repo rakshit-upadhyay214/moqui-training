@@ -1,0 +1,83 @@
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNameSpaceSchemaLocation="http://moqui.org/xsd/rest-api-3.xsd"
+          name="moqui" displayName="MoquiTraining" version="${moqui_version}" >
+
+    <resource name="parties" require-authorization="anonymous-all">
+        <method type="get">
+            <entity name="Party" operation="list"/>
+        </method>
+        <id name="partyId">
+            <method type="get">
+                <entity name="Party" operation="list"/>
+            </method>
+            <method type="post">
+                <entity name="Party" operation="create"/>
+            </method>
+
+            <resource name="contact" require-authorization="anonymous-all">
+                <method type="get">
+                    <entity name="ContactMech" operation="list"/>
+                </method>
+                <method type="post">
+                    <entity name="ContactMech" operation="create"/>
+                </method>
+            </resource>
+
+        </id>
+    </resource>
+
+    <resource name="products" require-authorization="anonymous-all">
+        <method type="post">
+            <entity name="Product" operation="create"/>
+        </method>
+        <method type="get">
+            <entity name="Product" operation="list"/>
+        </method>
+        <id name="productId">
+            <method type="get">
+                <entity name="Product" operation="one"/>
+            </method>
+            <method type="put">
+                <entity name="Product" operation="update"/>
+            </method>
+            <method type="delete">
+                <entity name="Product" operation="delete"/>
+            </method>
+        </id>
+    </resource>
+
+    <resource name="orders" require-authorization="anonymous-all">
+        <method type="post">
+            <service name="TutorialService.create#OrderHeader"/>
+        </method>
+        <id name="orderId">
+            <method type="get">
+                <service name="TutorialService.find#OrderHeader"/>
+            </method>
+            <method type="patch">
+                <service name="TutorialService.patch#OrderHeader"/>
+            </method>
+            <method type="delete">
+                <service name="TutorialService.delete#OrderHeader"/>
+            </method>
+
+            <resource name="items" require-authorization="anonymous-all">
+                <method type="post">
+                    <service name="TutorialService.create#OrderItem"/>
+                </method>
+            </resource>
+
+        </id>
+    </resource>
+
+    <resource name="orderItem" require-authorization="anonymous-all">
+
+        <method type="get">
+            <entity name="OrderItem" operation="list"/>
+        </method>
+        <method type="delete">
+            <service name="TutorialService.delete#OrderItem"/>
+        </method>
+
+    </resource>
+</resource>
+

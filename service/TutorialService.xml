@@ -36,7 +36,8 @@
             <parameter name="trainingDuration"/>
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="org.moqui.training.MoquiTraining" value-field="existingRecord"/>
+            <entity-find-one entity-name="org.moqui.training.MoquiTraining" value-field="existingRecord">
+            </entity-find-one>
             <if condition="existingRecord">
                 <then>
                     <set field="existingRecord.trainingDate" from="trainingDate"/>
@@ -50,5 +51,122 @@
                 <service-call name="org.moqui.training.MoquiTraining.create#MoquiTraining" in-map="context" out-map="context"/>
             </else>
         </actions>
+    </service>
+
+
+    <service verb="delete" noun="OrderHeader">
+        <in-parameters>
+            <parameter name="orderId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="delete#OrderItem" in-map="context" out-map="resultMp"/>
+        </actions>
+    </service>
+
+
+    <service verb="find" noun="OrderHeader">
+        <in-parameters>
+            <parameter name="orderId"/>
+        </in-parameters>
+        <out-parameters>
+                <parameter name="order"/>
+                <parameter name="itemList" type="List"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="OrderItem" list="itemList">
+                <econdition field-name="orderId" from="context.orderId"/>
+            </entity-find>
+                <entity-find-one entity-name="OrderHeader" value-field="order"/>
+        </actions>
+    </service>
+
+
+    <service verb="delete" noun="OrderItem">
+        <in-parameters>
+            <parameter name="orderId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderItemSeqId"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="OrderItem" list="itemList">
+                <econdition field-name="orderId" from="context.orderId"/>
+            </entity-find>
+            <iterate list="itemList" entry="item">
+                <entity-delete value-field="item"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="patch" noun="OrderHeader">
+        <in-parameters>
+            <parameter name="orderId"/>
+            <parameter name="partyId"/>
+            <parameter name="shippingContactMechId"/>
+            <parameter name="billingContactMechId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="OrderHeader" value-field="recordToUpdate"/>
+            <log message="--------------OrderHeader record found is ${recordToUpdate}----------------"/>
+            <entity-find-one entity-name="ContactMech" value-field="existingRecord1">
+                <field-map field-name="contactMechId" from="context.shippingContactMechId"/>
+            </entity-find-one>
+            <entity-find-one entity-name="ContactMech" value-field="existingRecord2">
+                <field-map field-name="contactMechId" from="context.billingContactMechId"/>
+            </entity-find-one>
+            <if condition="!(existingRecord1.partyId==existingRecord2.partyId)">
+                <then>
+                    <return message="ContactMechId doesn't exist for this partyId" type="warning"/>
+                </then>
+            </if>
+            <set field="recordToUpdate.shippingContactMechId" from="context.shippingContactMechId"/>
+            <set field="recordToUpdate.billingContactMechId" from="context.billingContactMechId"/>
+            <entity-update value-field="recordToUpdate"/>
+            <log message="--------------Updated OrderHeader record is ${recordToUpdate}----------------"/>
+        </actions>
+    </service>
+    
+    <service verb="create" noun="OrderHeader">
+        <in-parameters>
+            <parameter name="orderDate"/>
+            <parameter name="partyId"/>
+            <parameter name="shippingContactMechId"/>
+            <parameter name="billingContactMechId"/>
+            <parameter name="listOfItems" type="List">
+                <parameter name="orderItem" type="Map">
+                    <parameter name="productId"/>
+                    <parameter name="quantity"/>
+                    <parameter name="status"/>
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finalMp"/>
+        </out-parameters>
+        <actions>
+            <service-call name="create#OrderHeader" in-map="context" out-map="mp"/>
+            <iterate list="listOfItems" entry="item">
+                <set field="item.orderId" value="${mp.orderId}"/>
+                <service-call name="create#OrderItem" in-map="item" out-map="finalMp"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="OrderItem" type="entity-auto">
+        <in-parameters>
+            <auto-parameters entity-name="OrderItem" include="nonpk">
+                <exclude field-name="lastUpdatedStamp"/>
+            </auto-parameters>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderItemSeqId"/>
+            <parameter name="orderId"/>
+        </out-parameters>
     </service>
 </services>
