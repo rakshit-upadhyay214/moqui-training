@@ -76,6 +76,86 @@
         </actions>
     </service>
 
+    <service verb="delete" noun="Party">
+        <in-parameters>
+            <auto-parameters entity-name="Party" include="pk"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="Party" value-field="existingParty"/>
+            <if condition="isEmpty(existingParty)">
+                <then>
+                    <return message="PartyId doesn't Exist" type="warning"/>
+                </then>
+            </if>
+
+            <entity-find-one entity-name="OrderHeader" value-field="existingOrder">
+                <field-map field-name="partyId" from="context.partyId"/>
+            </entity-find-one>
+            <log message="---------------existingOrder=${existingOrder}----------------"/>
+
+            <entity-find entity-name="OrderItem" list="itemList">
+                <econdition field-name="orderId" from="existingOrder.orderId"/>
+            </entity-find>
+
+            <log message="---------------itemList=${itemList}--------------"/>
+
+            <iterate list="itemList" entry="item">
+                <entity-delete value-field="item"/>
+            </iterate>
+
+            <log message="---------------itemList deleted--------------"/>
+
+
+
+<!--            <if condition="!isEmpty(">-->
+<!--                <then>-->
+<!--                    <entity-delete-by-condition entity-name="OrderItem">-->
+<!--                        <econdition field-name="orderId" from="existingOrderItem.orderId"/>-->
+<!--                    </entity-delete-by-condition>-->
+<!--                </then>-->
+<!--            </if>-->
+
+            <if condition="existingOrder">
+                <then>
+                    <entity-delete-by-condition entity-name="OrderHeader">
+                        <econdition field-name="orderId" from="existingOrder.orderId"/>
+                    </entity-delete-by-condition>
+                    <log message="---------------OrderHeader deleted--------------"/>
+                </then>
+            </if>
+
+
+<!--            <entity-find-one entity-name="OrderItem" value-field="existingOrderItem">-->
+<!--                <field-map field-name="orderId" from="existingOrder.orderId"/>-->
+<!--            </entity-find-one>-->
+
+            <entity-find entity-name="ContactMech" list="contactList">
+                <econdition field-name="partyId" from="existingParty.partyId"/>
+            </entity-find>
+            <log message="---------------existingContact=${contactList}--------------"/>
+
+<!--            <entity-find-one entity-name="ContactMech" value-field="existingContact">-->
+<!--                <field-map field-name="partyId" from="context.partId"/>-->
+<!--            </entity-find-one>-->
+
+            <if condition="contactList">
+                <then>
+                    <iterate list="contactList" entry="contact">
+                        <entity-delete value-field="contact"/>
+                    </iterate>
+                    <log message="--------------Related Contacts also deleted--------------"/>
+                </then>
+            </if>
+
+            <entity-delete value-field="existingParty"/>
+
+        </actions>
+    </service>
+
+
 
     <service verb="delete" noun="OrderHeader">
         <in-parameters>

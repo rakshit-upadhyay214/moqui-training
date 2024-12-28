@@ -15,6 +15,9 @@
             <method type="patch">
                 <service name="TutorialService.patch#Party"/>
             </method>
+            <method type="delete">
+                <service name="TutorialService.delete#Party"/>
+            </method>
 
             <resource name="contact" require-authorization="anonymous-all">
                 <method type="get">
@@ -24,7 +27,6 @@
                     <entity name="ContactMech" operation="create"/>
                 </method>
             </resource>
-
         </id>
     </resource>
 
