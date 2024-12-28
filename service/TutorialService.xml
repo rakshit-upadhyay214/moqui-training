@@ -154,6 +154,25 @@
         </actions>
     </service>
 
+    <service verb="delete" noun="Product">
+        <in-parameters>
+            <parameter name="productId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="Product" value-field="existingProduct"/>
+            <entity-find entity-name="OrderItem" list="itemList">
+                <econdition field-name="productId" from="existingProduct.productId"/>
+            </entity-find>
+            <iterate list="itemList" entry="item">
+                <log message="-----------Order to delete is= ${item.orderId}--------"/>
+                <service-call name="delete#Main" in-map="item.orderId"/>
+            </iterate>
+        </actions>
+    </service>
+
 
     <service verb="delete" noun="OrderHeader">
         <in-parameters>
@@ -163,7 +182,11 @@
             <parameter name="orderId"/>
         </out-parameters>
         <actions>
-            <service-call name="delete#OrderItem" in-map="context" out-map="resultMp"/>
+            <log message="-----------Return comes to delete#OrderHeader = ${orderId}--------"/>
+            <service-call name="TutorialService.delete#OrderItem" in-map="context" out-map="result"/>
+            <entity-delete-by-condition entity-name="OrderHeader">
+                <econdition field-name="orderId" from="context.orderId"/>
+            </entity-delete-by-condition>
         </actions>
     </service>
 
@@ -184,11 +207,9 @@
         </actions>
     </service>
 
-
-
     <service verb="delete" noun="OrderItem">
         <in-parameters>
-            <parameter name="orderId"/>
+            <auto-parameters entity-name="OrderItem" include="pk"/>
         </in-parameters>
         <out-parameters>
             <parameter name="orderItemSeqId"/>
@@ -197,18 +218,17 @@
             <entity-find entity-name="OrderItem" list="itemList">
                 <econdition field-name="orderId" from="context.orderId"/>
             </entity-find>
+            <log message="-----------List of OrderItems in delete#OrderItem = ${itemList}--------" level="warn"/>
             <iterate list="itemList" entry="item">
                 <entity-delete value-field="item"/>
+                <log message="-----------Item Deleted ${item.orderItemSeqId}--------" level="warn"/>
             </iterate>
         </actions>
     </service>
 
     <service verb="patch" noun="OrderHeader">
         <in-parameters>
-            <parameter name="orderId"/>
-            <parameter name="partyId"/>
-            <parameter name="shippingContactMechId"/>
-            <parameter name="billingContactMechId"/>
+            <auto-parameters entity-name="OrderHeader"/>
         </in-parameters>
         <out-parameters>
             <parameter name="orderId"/>

@@ -48,7 +48,7 @@
                 <entity name="Product" operation="update"/>
             </method>
             <method type="delete">
-                <entity name="Product" operation="delete"/>
+                <service name="TutorialService.delete#Product"/>
             </method>
         </id>
     </resource>
