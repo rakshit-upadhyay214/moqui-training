@@ -26,6 +26,9 @@
                 <method type="post">
                     <entity name="ContactMech" operation="create"/>
                 </method>
+                <method type="delete">
+                    <service name="TutorialService.delete#ContactMech"/>
+                </method>
             </resource>
         </id>
     </resource>
