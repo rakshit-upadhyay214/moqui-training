@@ -12,6 +12,9 @@
             <method type="post">
                 <entity name="Party" operation="create"/>
             </method>
+            <method type="patch">
+                <service name="TutorialService.patch#Party"/>
+            </method>
 
             <resource name="contact" require-authorization="anonymous-all">
                 <method type="get">

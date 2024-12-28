@@ -54,6 +54,29 @@
     </service>
 
 
+    <service verb="patch" noun="Party">
+        <in-parameters>
+            <auto-parameters entity-name="Party">
+                <exclude field-name="lastUpdatedStamp"/>
+            </auto-parameters>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="Party" value-field="existingRecord"/>
+            <if condition="isEmpty(existingRecord)">
+                <then>
+                    <return message="PartyId doesn't Exist" type="warning"/>
+                </then>
+            </if>
+            <set field="existingRecord.firstName" from="firstName"/>
+            <set field="existingRecord.lastName" from="lastName"/>
+            <entity-update value-field="existingRecord"/>
+        </actions>
+    </service>
+
+
     <service verb="delete" noun="OrderHeader">
         <in-parameters>
             <parameter name="orderId"/>
