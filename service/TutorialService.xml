@@ -126,6 +126,17 @@
         </actions>
     </service>
 
+    <service verb="create" noun="ContactMech" type="entity-auto">
+        <in-parameters>
+            <auto-parameters entity-name="ContactMech" include="nonpk">
+                <exclude field-name="lastUpdatedStamp"/>
+            </auto-parameters>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contactMechId"/>
+        </out-parameters>
+    </service>
+
     <service verb="delete" noun="ContactMech">
         <in-parameters>
             <parameter name="partyId"/>
@@ -138,19 +149,55 @@
             <entity-find entity-name="OrderHeader" list="recordByShippingId">
                 <econdition field-name="shippingContactMechId" from="context.contactMechId"/>
             </entity-find>
+            <log message="records found by Shipping Id= ${recordByShippingId}"/>
             <iterate list="recordByShippingId" entry="order">
-                <entity-delete value-field="order"/>
+                <log message="--------------Deleting OrderHeader for recordByShippingId--------------"/>
+                <service-call name="TutorialService.delete#OrderHeader" in-map="order"/>
             </iterate>
+
 
             <entity-find entity-name="OrderHeader" list="recordByBillingId">
                 <econdition field-name="billingContactMechId" from="context.contactMechId"/>
             </entity-find>
-            <iterate list="recordByBillingId" entry="order">
-                <entity-delete value-field="order"/>
-            </iterate>
+            <log message="records found by Billing Id= ${recordByShippingId}"/>
+            <if condition="recordByBillingId!=null">
+                <iterate list="recordByBillingId" entry="order">
+                    <log message="--------------Deleting OrderHeader for recordByBillingId--------------"/>
+                    <service-call name="TutorialService.delete#OrderHeader" in-map="order"/>
+                </iterate>
+            </if>
             <entity-delete-by-condition entity-name="ContactMech">
                 <econdition field-name="contactMechId" from="context.contactMechId"/>
             </entity-delete-by-condition>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Product" type="entity-auto">
+        <in-parameters>
+            <auto-parameters entity-name="Product" include="nonpk">
+                <exclude field-name="lastUpdatedStamp"/>
+            </auto-parameters>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productId"/>
+        </out-parameters>
+    </service>
+
+    <service verb="patch" noun="Product">
+        <in-parameters>
+            <auto-parameters entity-name="Product">
+                <exclude field-name="lastUpdatedStamp"/>
+            </auto-parameters>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="Product" value-field="existingProduct"/>
+            <set field="existingProduct.productName" from="context.productName"/>
+            <set field="existingProduct.color" from="context.color"/>
+            <set field="existingProduct.size" from="context.size"/>
+            <entity-update value-field="existingProduct"/>
         </actions>
     </service>
 
@@ -213,7 +260,6 @@
             <parameter name="orderItemSeqId"/>
         </out-parameters>
         <actions>
-            <log message="-----------Return comes to delete#Item by orderId= ${context.orderId}----------"/>
             <entity-find entity-name="OrderItem" list="itemList">
                 <econdition field-name="orderId" from="context.orderId"/>
             </entity-find>
@@ -221,15 +267,36 @@
                 <log message="-----------Item Deleted ${item.orderItemSeqId}--------" level="warn"/>
                 <entity-delete value-field="item"/>
             </iterate>
-
             <entity-delete-by-condition entity-name="OrderHeader">
                 <econdition field-name="orderId" from="context.orderId"/>
             </entity-delete-by-condition>
         </actions>
     </service>
-<!--    No signature of method: java.lang.Boolean.and() is applicable for argument types: (org.moqui.impl.entity.EntityValueImpl) -->
-<!--    values: [[status:string, quantity:1, productId:1, orderId:100204, lastUpdatedStamp:2024-12-28 01:48:30.439, ...]] -->
-<!--    Possible solutions: and(java.lang.Boolean), any(), any(groovy.lang.Closure), find(), find(groovy.lang.Closure), wait()-->
+
+    <service verb="delete" noun="ItemById">
+        <in-parameters>
+            <parameter name="orderId"/>
+            <parameter name="orderItemSeqId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderItemSeqId"/>
+        </out-parameters>
+        <actions>
+            <entity-delete-by-condition entity-name="OrderItem">
+                <econdition field-name="orderItemSeqId" from="context.orderItemSeqId"/>
+            </entity-delete-by-condition>
+            <entity-find entity-name="OrderItem" list="itemList">
+                <econdition field-name="orderId" from="context.orderId"/>
+            </entity-find>
+            <if condition="itemList==null">
+                <entity-delete-by-condition entity-name="OrderHeader">
+                    <econdition field-name="orderId" from="context.orderId"/>
+                </entity-delete-by-condition>
+            </if>
+        </actions>
+    </service>
+
+
 
     <service verb="patch" noun="OrderHeader">
         <in-parameters>
@@ -282,9 +349,6 @@
                 <field-map field-name="contactMechId" from="context.billingContactMechId"/>
             </entity-find-one>
 
-            <log message="-----------------Address Record Found by Shipping Id----${recordByShippingId}-----------------"/>
-            <log message="-----------------Address Record Found by Billing Id----${recordByBillingId}-----------------"/>
-
             <if condition="isEmpty(recordByShippingId)">
                 <then>
                     <return message="Given ShippingContactId doesn't exist" type="warning"/>
@@ -295,9 +359,10 @@
                     <return message="Given BillingContactId doesn't exist" type="warning"/>
                 </then>
             </if>
-            <if condition="(recordByBillingId.partyId!=recordByShippingId.partyId)">
+            <if condition="!(recordByBillingId.partyId || context.partyId || recordByShippingId.partyId)">
                 <then>
-                    <return message="No partyId exists for entered Shipping and Billing ID" type="warning"/>
+                    <log message="-----------------Address Records Doesn't Match----${recordByBillingId.partyId},${recordByShippingId.partyId},${context.partyId}-----------------"/>
+                    <return message="Address Records Doesn't Match" type="warning"/>
                 </then>
             </if>
 
@@ -316,8 +381,7 @@
             </auto-parameters>
         </in-parameters>
         <out-parameters>
-            <parameter name="orderItemSeqId"/>
-            <parameter name="orderId"/>
+            <auto-parameters entity-name="OrderItem" include="pk"/>
         </out-parameters>
     </service>
 </services>

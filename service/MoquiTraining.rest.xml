@@ -24,18 +24,25 @@
                     <entity name="ContactMech" operation="list"/>
                 </method>
                 <method type="post">
-                    <entity name="ContactMech" operation="create"/>
+                    <service name="TutorialService.create#ContactMech"/>
                 </method>
-                <method type="delete">
-                    <service name="TutorialService.delete#ContactMech"/>
-                </method>
+
+                <id name="contactMechId">
+                    <method type="delete">
+                        <service name="TutorialService.delete#ContactMech"/>
+                    </method>
+
+                    <method type="put">
+                        <entity name="ContactMech" operation="update"/>
+                    </method>
+                </id>
             </resource>
         </id>
     </resource>
 
     <resource name="products" require-authorization="anonymous-all">
         <method type="post">
-            <entity name="Product" operation="create"/>
+            <service name="TutorialService.create#Product"/>
         </method>
         <method type="get">
             <entity name="Product" operation="list"/>
@@ -44,8 +51,8 @@
             <method type="get">
                 <entity name="Product" operation="one"/>
             </method>
-            <method type="put">
-                <entity name="Product" operation="update"/>
+            <method type="patch">
+                <service name="TutorialService.patch#Product"/>
             </method>
             <method type="delete">
                 <service name="TutorialService.delete#Product"/>
@@ -72,8 +79,12 @@
                 <method type="post">
                     <service name="TutorialService.create#OrderItem"/>
                 </method>
+                <id name="orderItemSeqId">
+                    <method type="delete">
+                        <service name="TutorialService.delete#ItemById"/>
+                    </method>
+                </id>
             </resource>
-
         </id>
     </resource>
 
