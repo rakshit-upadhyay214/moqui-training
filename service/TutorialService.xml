@@ -167,9 +167,10 @@
                 <econdition field-name="productId" from="existingProduct.productId"/>
             </entity-find>
             <iterate list="itemList" entry="item">
-                <log message="-----------Order to delete is= ${item.orderId}--------"/>
-                <service-call name="delete#Main" in-map="item.orderId"/>
+                <log message="-----------OrderItem for the product ${existingProduct.productId} is= ${item.orderId}--------"/>
+                <service-call name="TutorialService.delete#Item" in-map="item"/>
             </iterate>
+            <entity-delete value-field="existingProduct"/>
         </actions>
     </service>
 
@@ -183,10 +184,7 @@
         </out-parameters>
         <actions>
             <log message="-----------Return comes to delete#OrderHeader = ${orderId}--------"/>
-            <service-call name="TutorialService.delete#OrderItem" in-map="context" out-map="result"/>
-            <entity-delete-by-condition entity-name="OrderHeader">
-                <econdition field-name="orderId" from="context.orderId"/>
-            </entity-delete-by-condition>
+            <service-call name="TutorialService.delete#Item" in-map="context" out-map="result"/>
         </actions>
     </service>
 
@@ -207,24 +205,31 @@
         </actions>
     </service>
 
-    <service verb="delete" noun="OrderItem">
+    <service verb="delete" noun="Item">
         <in-parameters>
-            <auto-parameters entity-name="OrderItem" include="pk"/>
+            <auto-parameters entity-name="OrderItem"/>
         </in-parameters>
         <out-parameters>
             <parameter name="orderItemSeqId"/>
         </out-parameters>
         <actions>
+            <log message="-----------Return comes to delete#Item by orderId= ${context.orderId}----------"/>
             <entity-find entity-name="OrderItem" list="itemList">
                 <econdition field-name="orderId" from="context.orderId"/>
             </entity-find>
-            <log message="-----------List of OrderItems in delete#OrderItem = ${itemList}--------" level="warn"/>
             <iterate list="itemList" entry="item">
-                <entity-delete value-field="item"/>
                 <log message="-----------Item Deleted ${item.orderItemSeqId}--------" level="warn"/>
+                <entity-delete value-field="item"/>
             </iterate>
+
+            <entity-delete-by-condition entity-name="OrderHeader">
+                <econdition field-name="orderId" from="context.orderId"/>
+            </entity-delete-by-condition>
         </actions>
     </service>
+<!--    No signature of method: java.lang.Boolean.and() is applicable for argument types: (org.moqui.impl.entity.EntityValueImpl) -->
+<!--    values: [[status:string, quantity:1, productId:1, orderId:100204, lastUpdatedStamp:2024-12-28 01:48:30.439, ...]] -->
+<!--    Possible solutions: and(java.lang.Boolean), any(), any(groovy.lang.Closure), find(), find(groovy.lang.Closure), wait()-->
 
     <service verb="patch" noun="OrderHeader">
         <in-parameters>

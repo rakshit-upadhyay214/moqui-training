@@ -83,7 +83,7 @@
             <entity name="OrderItem" operation="list"/>
         </method>
         <method type="delete">
-            <service name="TutorialService.delete#OrderItem"/>
+            <service name="TutorialService.delete#Item"/>
         </method>
 
     </resource>
