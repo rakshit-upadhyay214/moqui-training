@@ -2,13 +2,13 @@
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
-<!--    Create a new service to fetch records from the MoquiTraining entity.-->
+    <!--    Create a new service to fetch records from the MoquiTraining entity.-->
     <service verb="find" noun="MoquiTraining">
-<!--        Allow filtering by trainingName or trainingId.-->
+        <!--        Allow filtering by trainingName or trainingId.-->
         <in-parameters>
             <parameter name="trainingId" required="true"/>
         </in-parameters>
-<!--        Return a list of records containing only trainingId, trainingName, and trainingDate.-->
+        <!--        Return a list of records containing only trainingId, trainingName, and trainingDate.-->
         <out-parameters>
             <parameter name="trainingList"/>
         </out-parameters>
@@ -31,8 +31,8 @@
         <out-parameters>
             <parameter name="trainingId" required="true"/>
             <parameter name="trainingName" required="true"/>
-            <parameter name="trainingDate" />
-            <parameter name="trainingPrice" />
+            <parameter name="trainingDate"/>
+            <parameter name="trainingPrice"/>
             <parameter name="trainingDuration"/>
         </out-parameters>
         <actions>
@@ -48,7 +48,8 @@
                 </then>
             </if>
             <else>
-                <service-call name="org.moqui.training.MoquiTraining.create#MoquiTraining" in-map="context" out-map="context"/>
+                <service-call name="org.moqui.training.MoquiTraining.create#MoquiTraining" in-map="context"
+                              out-map="context"/>
             </else>
         </actions>
     </service>
@@ -72,7 +73,7 @@
             </if>
             <set field="existingRecord.firstName" from="firstName"/>
             <set field="existingRecord.lastName" from="lastName"/>
-            <entity-update value-field="existingRecord"/>
+
         </actions>
     </service>
 
@@ -241,14 +242,14 @@
             <parameter name="orderId"/>
         </in-parameters>
         <out-parameters>
-                <parameter name="order"/>
-                <parameter name="itemList" type="List"/>
+            <parameter name="order"/>
+            <parameter name="itemList" type="List"/>
         </out-parameters>
         <actions>
             <entity-find entity-name="OrderItem" list="itemList">
                 <econdition field-name="orderId" from="context.orderId"/>
             </entity-find>
-                <entity-find-one entity-name="OrderHeader" value-field="order"/>
+            <entity-find-one entity-name="OrderHeader" value-field="order"/>
         </actions>
     </service>
 
@@ -297,38 +298,48 @@
     </service>
 
 
-
     <service verb="patch" noun="OrderHeader">
         <in-parameters>
-            <auto-parameters entity-name="OrderHeader"/>
+            <auto-parameters entity-name="OrderHeader">
+                <exclude field-name="lastUpdatedStamp"/>
+            </auto-parameters>
         </in-parameters>
         <out-parameters>
             <parameter name="orderId"/>
         </out-parameters>
         <actions>
+
             <entity-find-one entity-name="OrderHeader" value-field="recordToUpdate"/>
-            <log message="--------------OrderHeader record found is ${recordToUpdate}----------------"/>
+            <log message="----------------Record to Update = ${recordToUpdate}---------------" level="warn"/>
             <entity-find-one entity-name="ContactMech" value-field="existingRecord1">
                 <field-map field-name="contactMechId" from="context.shippingContactMechId"/>
             </entity-find-one>
+            <log message="----------------Record found by shipping id=${existingRecord1}---------------" level="warn"/>
+            <if condition="!existingRecord1">
+                <return message="No such Shipping Id exists in record" type="danger"/>
+            </if>
+            <set field="recordToUpdate.shippingContactMechId" from="existingRecord1.contactMechId"/>
+
             <entity-find-one entity-name="ContactMech" value-field="existingRecord2">
                 <field-map field-name="contactMechId" from="context.billingContactMechId"/>
             </entity-find-one>
+            <log message="----------------Record found by billing id=${existingRecord2}---------------" level="warn"/>
+            <if condition="!existingRecord2">
+                <return message="No such Billing Id exists in record" type="danger"/>
+            </if>
+            <set field="recordToUpdate.billingContactMechId" from="existingRecord2.contactMechId"/>
             <if condition="!(existingRecord1.partyId==existingRecord2.partyId)">
                 <then>
                     <return message="ContactMechId doesn't exist for this partyId" type="warning"/>
                 </then>
             </if>
-            <set field="recordToUpdate.shippingContactMechId" from="context.shippingContactMechId"/>
-            <set field="recordToUpdate.billingContactMechId" from="context.billingContactMechId"/>
             <entity-update value-field="recordToUpdate"/>
-            <log message="--------------Updated OrderHeader record is ${recordToUpdate}----------------"/>
         </actions>
     </service>
-    
+
     <service verb="create" noun="OrderHeader">
-       <in-parameters>
-           <auto-parameters entity-name="OrderHeader" include="nonpk"/>
+        <in-parameters>
+            <auto-parameters entity-name="OrderHeader" include="nonpk"/>
             <parameter name="listOfItems" type="List">
                 <parameter name="orderItem" type="Map">
                     <parameter name="productId"/>
@@ -351,19 +362,37 @@
 
             <if condition="isEmpty(recordByShippingId)">
                 <then>
-                    <return message="Given ShippingContactId doesn't exist" type="warning"/>
+                    <log message="-----------Shipping Id is null-----------" level="warn"/>
+                    <entity-find-one entity-name="Party" value-field="existingParty"/>
+                    <log message="-----------For Party=${existingParty} -----------" level="warn"/>
+                    <entity-find-one entity-name="ContactMech" value-field="contactForThisParty">
+                        <field-map field-name="partyId" from="existingParty.partyId"/>
+                    </entity-find-one>
+                    <log message="-----------Related ContactMechId=${contactForThisParty} -----------" level="warn"/>
+                    <set field="context.shippingContactMechId" from="contactForThisParty.contactMechId"/>
+                    <log message="-----------Updated context=${context.shippingContactMechId} -----------" level="warn"/>
                 </then>
             </if>
             <if condition="(recordByBillingId==null)">
                 <then>
-                    <return message="Given BillingContactId doesn't exist" type="warning"/>
+                    <log message="-----------Billing Id is null-----------" level="warn"/>
+                    <entity-find-one entity-name="Party" value-field="existingParty"/>
+                    <log message="-----------For Party=${existingParty} -----------" level="warn"/>
+                    <entity-find-one entity-name="ContactMech" value-field="contactForThisParty">
+                        <field-map field-name="partyId" from="existingParty.partyId"/>
+                    </entity-find-one>
+                    <log message="-----------Related ContactMechId=${contactForThisParty} -----------" level="warn"/>
+                    <set field="context.billingContactMechId" from="contactForThisParty.contactMechId"/>
+                    <log message="-----------Updated context=${context.billingContactMechId} -----------" level="warn"/>
                 </then>
             </if>
-            <if condition="!(recordByBillingId.partyId || context.partyId || recordByShippingId.partyId)">
-                <then>
-                    <log message="-----------------Address Records Doesn't Match----${recordByBillingId.partyId},${recordByShippingId.partyId},${context.partyId}-----------------"/>
-                    <return message="Address Records Doesn't Match" type="warning"/>
-                </then>
+            <if condition="!isEmpty(recordByBillingId) and !isEmpty(recordByShippingId)">
+                <if condition="!(recordByBillingId.partyId || context.partyId || recordByShippingId.partyId)">
+                    <then>
+                        <log message="-----------------Address Records Doesn't Match----${recordByBillingId.partyId},${recordByShippingId.partyId},${context.partyId}-----------------"/>
+                        <return message="Address Records Doesn't Match" type="warning"/>
+                    </then>
+                </if>
             </if>
 
             <service-call name="create#OrderHeader" in-map="context" out-map="mp"/>
