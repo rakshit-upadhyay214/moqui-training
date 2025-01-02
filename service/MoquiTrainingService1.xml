@@ -5,10 +5,6 @@
         <in-parameters>
             <auto-parameters entity-name="org.moqui.training.MoquiTraining"/>
             <parameter name="trainingId" required="true"/>
-            <parameter name="trainingName"/>
-            <parameter name="trainingDate" type="Date"/>
-            <parameter name="trainingPrice"/>
-            <parameter name="trainingDuration"/>
         </in-parameters>
         <out-parameters>
             <auto-parameters include="pk" required="true"/>

@@ -10,15 +10,15 @@
     </entity>
 
     <entity entity-name="Party" package="org.moqui.training">
-        <field name="partyId" type="text-short" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
         <field name="partyType" type="text-medium" not-null="true" />
         <field name="firstName" type="text-medium" />
         <field name="lastName" type="text-medium" />
     </entity>
 
     <entity entity-name="ContactMech" package="org.moqui.training">
-        <field name="contactMechId" type="text-short" is-pk="true"/>
-        <field name="partyId" type="text-short" />
+        <field name="contactMechId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" />
         <field name="streetAddress" type="text-medium" not-null="true" />
         <field name="city" type="text-medium" />
         <field name="state" type="text-medium" />
@@ -30,16 +30,16 @@
     </entity>
 
     <entity entity-name="Product" package="org.moqui.training">
-        <field name="productId" type="text-short" is-pk="true"/>
+        <field name="productId" type="id" is-pk="true"/>
         <field name="productName" type="text-medium" />
         <field name="color" type="text-medium" />
         <field name="size" type="text-medium" />
     </entity>
 
     <entity entity-name="OrderHeader" package="org.moqui.training">
-        <field name="orderId" type="text-short" is-pk="true"/>
+        <field name="orderId" type="id" is-pk="true"/>
         <field name="orderDate" type="date" not-null="true"/>
-        <field name="partyId" type="text-medium"/>
+        <field name="partyId" type="id"/>
         <field name="shippingContactMechId" type="text-medium" />
         <field name="billingContactMechId" type="text-medium" />
         <relationship type="one" related="Party">
@@ -54,8 +54,8 @@
     </entity>
 
     <entity entity-name="OrderItem" package="org.moqui.training">
-        <field name="orderItemSeqId" type="text-short" is-pk="true"/>
-        <field name="orderId" type="text-medium" />
+        <field name="orderItemSeqId" type="id" is-pk="true"/>
+        <field name="orderId" type="id" />
         <field name="productId" type="text-short" />
         <field name="quantity" type="number-integer" not-null="true"/>
         <field name="status" type="text-medium" />
